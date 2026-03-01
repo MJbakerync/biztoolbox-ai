@@ -25,7 +25,7 @@ export default function Home() {
             </Link>
           </div>
           <p className="mt-4 text-sm text-gray-500">
-            3 free uses per day \u2022 No signup required \u2022 Unlimited with Pro
+            3 free uses per day • No signup required • Unlimited with Pro
           </p>
         </div>
       </section>
@@ -58,7 +58,7 @@ export default function Home() {
             href="/tools"
             className="text-blue-600 font-medium hover:underline"
           >
-            View all {tools.length} tools \u2192
+            View all {tools.length} tools →
           </Link>
         </div>
       </section>
