@@ -38,7 +38,7 @@ export default function RootLayout({
         <footer className="border-t bg-gray-50 mt-20">
           <div className="max-w-7xl mx-auto px-4 py-12">
             <div className="text-center text-sm text-gray-500">
-              \u00a9 2025 BizToolbox AI. All rights reserved.
+             © 2025 BizToolbox AI. All rights reserved.
             </div>
           </div>
         </footer>
