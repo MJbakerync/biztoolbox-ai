@@ -1,0 +1,111 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { getUser, logout, getProjects, deleteProject, getBrandProfile, saveBrandProfile, getUsageToday } from "@/lib/store";
+import type { SavedProject, BrandProfile, UserProfile } from "@/lib/store";
+
+export default function DashboardPage() {
+    const router = useRouter();
+    const [user, setUser] = useState<UserProfile | null>(null);
+    const [projects, setProjects] = useState<SavedProject[]>([]);
+    const [brand, setBrand] = useState<BrandProfile>({ companyName: "", industry: "", tone: "", targetAudience: "", keyDifferentiators: "", website: "" });
+    const [tab, setTab] = useState<"projects" | "brand" | "settings">("projects");
+    const [usage, setUsage] = useState(0);
+    const [brandSaved, setBrandSaved] = useState(false);
+
+  useEffect(() => {
+        const u = getUser();
+        if (!u || !u.isLoggedIn) { router.push("/signin"); return; }
+        setUser(u);
+        setProjects(getProjects());
+        setUsage(getUsageToday());
+        const b = getBrandProfile();
+        if (b) setBrand(b);
+  }, [router]);
+
+  const handleDeleteProject = (id: string) => { deleteProject(id); setProjects(getProjects()); };
+    const handleSaveBrand = () => { saveBrandProfile(brand); setBrandSaved(true); setTimeout(() => setBrandSaved(false), 2000); };
+    const handleLogout = () => { logout(); router.push("/"); };
+
+  if (!user) return <div className="flex justify-center py-20"><p>Loading...</p>p></div>div>;
+  
+    return (
+          <div className="max-w-6xl mx-auto px-4 py-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                        <div>
+                                  <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user.name}</h1>h1>
+                                  <p className="text-gray-600 mt-1">{user.isPro ? "Pro plan" : "Free plan \u2014 " + (3 - usage) + " uses remaining today"}</p>p>
+                        </div>div>
+                        <div className="flex gap-3">
+                                  <Link href="/tools" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm">Use a Tool</Link>Link>
+                                  <button onClick={handleLogout} className="border px-4 py-2 rounded-lg hover:bg-gray-50 transition text-sm">Sign Out</button>button>
+                        </div>div>
+                </div>div>
+            {!user.isPro && (
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-6 mb-8">
+                              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                          <div><h3 className="text-lg font-semibold">Upgrade to Pro</h3>h3><p className="text-blue-100 text-sm mt-1">Unlimited generations, GPT-4o, brand voice, PDF export, and more.</p>p></div>div>
+                                          <Link href="/pricing" className="bg-white text-blue-600 px-6 py-2 rounded-lg font-medium hover:bg-blue-50 transition whitespace-nowrap">View Plans</Link>Link>
+                              </div>div>
+                    </div>div>
+                )}
+                <div className="flex gap-1 border-b mb-6">
+                  {(["projects", "brand", "settings"] as const).map((t) => (
+                      <button key={t} onClick={() => setTab(t)} className={"px-4 py-2 text-sm font-medium capitalize " + (tab === t ? "border-b-2 border-blue-600 text-blue-600" : "text-gray-500 hover:text-gray-700")}>{t === "brand" ? "Brand Voice" : t}</button>button>
+                    ))}
+                </div>div>
+            {tab === "projects" && (
+                    <div>
+                              <h2 className="text-xl font-semibold mb-4">Saved Projects</h2>h2>
+                      {projects.length === 0 ? (
+                                  <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed"><p className="text-gray-500 mb-4">No saved projects yet.</p>p><Link href="/tools" className="text-blue-600 font-medium hover:underline">Browse Tools</Link>Link></div>div>
+                                ) : (
+                                  <div className="grid gap-4">{projects.map((p) => (
+                                                  <div key={p.id} className="border rounded-xl p-5 hover:shadow-sm transition">
+                                                                  <div className="flex justify-between items-start">
+                                                                                    <div className="flex-1">
+                                                                                                        <div className="flex items-center gap-2 mb-1"><span className="text-xl">{p.toolIcon}</span>span><span className="text-xs bg-gray-100 px-2 py-0.5 rounded">{p.toolName}</span>span></div>div>
+                                                                                                        <h3 className="font-medium text-gray-900">{p.title}</h3>h3>
+                                                                                                        <p className="text-sm text-gray-500 mt-1">{p.result.substring(0, 150)}...</p>p>
+                                                                                                        <p className="text-xs text-gray-400 mt-2">{new Date(p.createdAt).toLocaleDateString()}</p>p>
+                                                                                      </div>div>
+                                                                                    <div className="flex gap-2 ml-4">
+                                                                                                        <Link href={"/tools/" + p.toolSlug} className="text-sm text-blue-600 hover:underline">Open</Link>Link>
+                                                                                                        <button onClick={() => handleDeleteProject(p.id)} className="text-sm text-red-500 hover:underline">Delete</button>button>
+                                                                                      </div>div>
+                                                                  </div>div>
+                                                  </div>div>
+                                                ))}</div>div>
+                              )}
+                    </div>div>
+                )}
+            {tab === "brand" && (
+                    <div className="max-w-2xl">
+                              <h2 className="text-xl font-semibold mb-2">Brand Voice Profile</h2>h2>
+                              <p className="text-gray-600 text-sm mb-6">Configure your brand to personalize every AI generation.</p>p>
+                              <div className="space-y-4">
+                                          <div><label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>label><input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Acme Inc." value={brand.companyName} onChange={(e) => setBrand({ ...brand, companyName: e.target.value })} /></div>div>
+                                          <div><label className="block text-sm font-medium text-gray-700 mb-1">Industry</label>label><input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="SaaS, E-commerce..." value={brand.industry} onChange={(e) => setBrand({ ...brand, industry: e.target.value })} /></div>div>
+                                          <div><label className="block text-sm font-medium text-gray-700 mb-1">Brand Tone</label>label><select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" value={brand.tone} onChange={(e) => setBrand({ ...brand, tone: e.target.value })}><option value="">Select...</option>option><option>Professional</option>option><option>Casual</option>option><option>Friendly</option>option><option>Bold</option>option></select>select></div>div>
+                                          <div><label className="block text-sm font-medium text-gray-700 mb-1">Target Audience</label>label><input type="text" className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Small business owners..." value={brand.targetAudience} onChange={(e) => setBrand({ ...brand, targetAudience: e.target.value })} /></div>div>
+                                          <div><label className="block text-sm font-medium text-gray-700 mb-1">Key Differentiators</label>label><textarea className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none min-h-[80px]" placeholder="What makes you unique?" value={brand.keyDifferentiators} onChange={(e) => setBrand({ ...brand, keyDifferentiators: e.target.value })} /></div>div>
+                                          <button onClick={handleSaveBrand} className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition">{brandSaved ? "Saved!" : "Save Brand Profile"}</button>button>
+                              </div>div>
+                    </div>div>
+                )}
+            {tab === "settings" && (
+                    <div className="max-w-2xl">
+                              <h2 className="text-xl font-semibold mb-4">Account Settings</h2>h2>
+                              <div className="border rounded-xl p-6 space-y-4">
+                                          <div><label className="block text-sm text-gray-500">Name</label>label><p className="font-medium">{user.name}</p>p></div>div>
+                                          <div><label className="block text-sm text-gray-500">Email</label>label><p className="font-medium">{user.email}</p>p></div>div>
+                                          <div><label className="block text-sm text-gray-500">Plan</label>label><p className="font-medium">{user.isPro ? "Pro" : "Free"}</p>p></div>div>
+                                          <div><label className="block text-sm text-gray-500">Member Since</label>label><p className="font-medium">{new Date(user.createdAt).toLocaleDateString()}</p>p></div>div>
+                              </div>div>
+                      {!user.isPro && <div className="mt-6"><Link href="/pricing" className="text-blue-600 font-medium hover:underline">Upgrade to Pro</Link>Link></div>div>}
+                    </div>div>
+                )}
+          </div>div>
+        );
+}</div>
