@@ -20,7 +20,10 @@ export interface ToolConfig {
   seoKeywords: string[];
   fields: FormField[];
   systemPrompt: string;
-}
+  targetAudience?: string[];
+    sampleOutput?: string;
+      howItWorks?: string[];
+        useCases?: string[];
 
 export const tools: ToolConfig[] = [
   {
