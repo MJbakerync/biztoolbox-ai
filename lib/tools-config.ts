@@ -24,6 +24,7 @@ export interface ToolConfig {
     sampleOutput?: string;
       howItWorks?: string[];
         useCases?: string[];
+}
 
 export const tools: ToolConfig[] = [
   {
