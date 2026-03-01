@@ -117,7 +117,7 @@ export const tools: ToolConfig[] = [
       { name: "keyPoints", label: "Key Things to Mention", type: "textarea", placeholder: "Achievements, interests, specialties", required: false },
     ],
     systemPrompt: "You are a social media branding expert. Generate 5 bio variations for the specified platform that: 1) Fit within platform character limits, 2) Include relevant keywords, 3) Have a clear value proposition, 4) Match the desired personality, 5) Include a CTA where appropriate. For each bio, note why it works and what makes it effective.",
-  },120
+  },
 
     // Tool 6: Employee Offer Letter Generator
   {
